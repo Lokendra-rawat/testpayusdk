@@ -28,7 +28,7 @@ const removeSubscriptions = () => {
   PayuEvent.removeAllListeners('PAYU_PAYMENT_FAILED');
 };
 
-class PayuMoney {
+class Payu {
   static pay(options) {
     let data = {
       key: options.key,
@@ -103,7 +103,7 @@ const App = () => {
         <Button
           onPress={async () => {
             try {
-              let data = await PayuMoney.pay(
+              let data = await Payu.pay(
                 {
                   key,
                   txnId,
