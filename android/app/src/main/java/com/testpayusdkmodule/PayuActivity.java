@@ -81,7 +81,7 @@ public class PayuActivity extends AppCompatActivity {
         Intent intent = new Intent(currentActivity, PayUBaseActivity.class);
 
         PayuConfig payuConfig = new PayuConfig();
-        payuConfig.setEnvironment(PayuConstants.PRODUCTION_ENV);
+        payuConfig.setEnvironment(PayuConstants.STAGING_ENV);
 
         intent.putExtra(PayuConstants.PAYU_CONFIG, payuConfig);
 //        intent.putExtra(PayuConstants.ENV, PayuConstants.PRODUCTION_ENV);

@@ -88,7 +88,11 @@ const productInfo = 'Tshirt';
 const merchantSUrl = 'https://payu.herokuapp.com/success';
 const merchantFUrl = 'https://payu.herokuapp.com/failure';
 
-let hash = sha512(key + '|' + txnId + '|' + amount + '|' + productInfo + '|' + firstName + '|' + email + '|||||||||||' + salt).toString('hex');
+// let hash = sha512(key + '|' + txnId + '|' + amount + '|' + productInfo + '|' + firstName + '|' + email + '|||||||||||' + salt).toString('hex');
+
+let command = 'payment_related_details_for_mobile_sdk', var1 = 'default'
+
+let hash = sha512(key + '|' + command + '|' + var1 + '|' + salt)
 console.warn("Hash from react native is", hash);
 
 const App = () => {
