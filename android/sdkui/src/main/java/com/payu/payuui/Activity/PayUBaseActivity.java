@@ -3,8 +3,9 @@ package com.payu.payuui.Activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.view.ViewPager;
+
+import androidx.fragment.app.FragmentActivity;
+import androidx.viewpager.widget.ViewPager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -46,22 +47,18 @@ import com.payu.payuui.Fragment.SavedCardItemFragment;
 import com.payu.payuui.R;
 import com.payu.payuui.SdkuiUtil.SdkUIConstants;
 import com.payu.payuui.Widget.SwipeTab.SlidingTabLayout;
-import com.payu.phonepe.PhonePe;
-import com.payu.samsungpay.PayUSUPIPostData;
 import com.payu.samsungpay.PayUSamsungPay;
-import com.payu.samsungpay.PayUSamsungPayCallback;
+
+import org.json.JSONStringer;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static android.R.attr.description;
-import static android.R.attr.key;
 
 /**
  * This activity is where you get the payment options.
  */
+
 public class PayUBaseActivity extends FragmentActivity implements PaymentRelatedDetailsListener, ValueAddedServiceApiListener, View.OnClickListener {
 
     public Bundle bundle;
@@ -103,10 +100,6 @@ public class PayUBaseActivity extends FragmentActivity implements PaymentRelated
 
         bundle = getIntent().getExtras();
 
-
-
-
-
         if (bundle != null) {
             payuConfig = bundle.getParcelable(PayuConstants.PAYU_CONFIG);
             payuConfig = null != payuConfig ? payuConfig : new PayuConfig();
@@ -119,7 +112,7 @@ public class PayUBaseActivity extends FragmentActivity implements PaymentRelated
             userCredentials = mPaymentParams.getUserCredentials();
 
 
-         // Call back method of PayU custom browser to check availability of Samsung Pay
+            // Call back method of PayU custom browser to check availability of Samsung Pay
 
             PayUCustomBrowserCallback payUCustomBrowserCallback = new PayUCustomBrowserCallback() {
 
@@ -139,8 +132,8 @@ public class PayUBaseActivity extends FragmentActivity implements PaymentRelated
 
             //In this method we check the availability of Samsung Pay as Payment option on device being used
 
-            new CustomBrowser().checkForPaymentAvailability(this, paymentOption.SAMSUNGPAY, payUCustomBrowserCallback, mPayUHashes.getPaymentRelatedDetailsForMobileSdkHash(), merchantKey, userCredentials);
-            new CustomBrowser().checkForPaymentAvailability(this, paymentOption.PHONEPE, payUCustomBrowserCallback, mPayUHashes.getPaymentRelatedDetailsForMobileSdkHash(), merchantKey, userCredentials);
+//            new CustomBrowser().checkForPaymentAvailability(this, paymentOption.SAMSUNGPAY, payUCustomBrowserCallback, mPayUHashes.getPaymentRelatedDetailsForMobileSdkHash(), merchantKey, userCredentials);
+//            new CustomBrowser().checkForPaymentAvailability(this, paymentOption.PHONEPE, payUCustomBrowserCallback, mPayUHashes.getPaymentRelatedDetailsForMobileSdkHash(), merchantKey, userCredentials);
 
             ((TextView) findViewById(R.id.textview_amount)).setText(SdkUIConstants.AMOUNT + ": " + mPaymentParams.getAmount());
             ((TextView) findViewById(R.id.textview_txnid)).setText(SdkUIConstants.TXN_ID + ": " + mPaymentParams.getTxnId());
@@ -161,6 +154,8 @@ public class PayUBaseActivity extends FragmentActivity implements PaymentRelated
                     PostData postData = new MerchantWebServicePostParams(merchantWebService).getMerchantWebServicePostParams();
                     if (postData.getCode() == PayuErrors.NO_ERROR) {
                         // ok we got the post params, let make an api call to payu to fetch the payment related details
+                        System.out.println("In if condition of PostData" + postData.getResult());
+
                         payuConfig.setData(postData.getResult());
 
                         // lets set the visibility of progress bar
@@ -169,6 +164,7 @@ public class PayUBaseActivity extends FragmentActivity implements PaymentRelated
                         GetPaymentRelatedDetailsTask paymentRelatedDetailsForMobileSdkTask = new GetPaymentRelatedDetailsTask(this);
                         paymentRelatedDetailsForMobileSdkTask.execute(payuConfig);
                     } else {
+                        System.out.println("In else condition of PostData" + postData.getResult());
                         Toast.makeText(this, postData.getResult(), Toast.LENGTH_LONG).show();
 //                 close the progress bar
                         mProgressBar.setVisibility(View.GONE);
@@ -221,7 +217,6 @@ public class PayUBaseActivity extends FragmentActivity implements PaymentRelated
     @Override
     public void onPaymentRelatedDetailsResponse(PayuResponse payuResponse) {
         mPayuResponse = payuResponse;
-
 
         boolean lazypay = mPayuResponse.isLazyPayAvailable();
 
@@ -307,13 +302,7 @@ public class PayUBaseActivity extends FragmentActivity implements PaymentRelated
                 paymentOptionsList.add(SdkUIConstants.CBPHONEPE);
             }
 
-
-
-
-            }
-
-
-            else {
+        } else {
             Toast.makeText(this, "Something went wrong : " + payuResponse.getResponseStatus().getResult(), Toast.LENGTH_LONG).show();
         }
 
@@ -489,13 +478,11 @@ public class PayUBaseActivity extends FragmentActivity implements PaymentRelated
 
             if (mPostData != null && mPostData.getCode() == PayuErrors.NO_ERROR) {
                 payuConfig.setData(mPostData.getResult());
-
             }
+
 //            else if (paymentOptionsList.get(viewPager.getCurrentItem()).equalsIgnoreCase("SAMPAY")) {
 //                        payuConfig.setData(samPayPostData);
-//
 //            }
-
 
             Intent intent = new Intent(this, PaymentsActivity.class);
             intent.putExtra(PayuConstants.PAYU_CONFIG, payuConfig);
@@ -504,9 +491,9 @@ public class PayUBaseActivity extends FragmentActivity implements PaymentRelated
 
             startActivityForResult(intent, PayuConstants.PAYU_REQUEST_CODE);
         } else {
+            System.out.println("in else condition of the toast" + mPostData.getResult());
             if (mPostData != null)
                 Toast.makeText(this, mPostData.getResult(), Toast.LENGTH_LONG).show();
-
         }
     }
 

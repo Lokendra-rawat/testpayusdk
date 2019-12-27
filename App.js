@@ -1,3 +1,5 @@
+/* eslint-disable quotes */
+/* eslint-disable semi */
 /* eslint-disable no-unused-vars */
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable prettier/prettier */
@@ -11,40 +13,85 @@
 
 import React from 'react';
 import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
   View,
-  Text,
   StatusBar,
   NativeModules,
   Button,
+  NativeEventEmitter,
 } from 'react-native';
 
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+const PayuPay = NativeModules.payu;
+const PayuEvent = new NativeEventEmitter(PayuPay);
 
-const { payu } = NativeModules;
+const removeSubscriptions = () => {
+  PayuEvent.removeAllListeners('PAYU_PAYMENT_SUCCESS');
+  PayuEvent.removeAllListeners('PAYU_PAYMENT_FAILED');
+};
+
+class PayuMoney {
+  static pay(options) {
+    let data = {
+      key: options.key,
+      txnId: options.txnId,
+      amount: options.amount,
+      firstName: options.firstName,
+      email: options.email,
+      phone: options.phone,
+      productInfo: options.productInfo,
+      merchantSUrl: options.merchantSUrl,
+      merchantFUrl: options.merchantFUrl,
+      hash: options.hash,
+    };
+    return new Promise(function (resolve, reject) {
+      PayuEvent.addListener('PAYU_PAYMENT_SUCCESS', (response) => {
+        resolve(response);
+        removeSubscriptions();
+      });
+      PayuEvent.addListener('PAYU_PAYMENT_FAILED', (response) => {
+
+        console.warn('err res from native side', response);
+
+        reject({ success: false });
+        removeSubscriptions();
+      });
+      PayuPay.makePayment(data.key, data.txnId, data.amount, data.firstName, data.email, data.phone, data.productInfo, data.merchantSUrl, data.merchantFUrl, data.hash);
+    });
+  }
+}
+
 var sha512 = require('js-sha512').sha512;
 
+
+// mPaymentParams.setKey("gtKFFx");
+// mPaymentParams.setAmount("15.0");
+// mPaymentParams.setProductInfo("Tshirt");
+// mPaymentParams.setFirstName("Guru");
+// mPaymentParams.setEmail("guru@gmail.com");
+// mPaymentParams.setTxnId("0123479543689");
+// mPaymentParams.setSurl("https://payu.herokuapp.com/success");
+// mPaymentParams.setFurl("https://payu.herokuapp.com/failure");
+// mPaymentParams.setUdf1("udf1");
+// mPaymentParams.setUdf2("udf2");
+// mPaymentParams.setUdf3("udf3");
+// mPaymentParams.setUdf4("udf4");
+// mPaymentParams.setUdf5("udf5");
+// import PayuSdk from 'react-native-payu-sdk';
+
 const key = 'gtKFFx';
-const txnId = Math.floor(1000000000 + Math.random() * 900000000).toString();
+const salt = 'eCwWELxi'// 'eCwWELxi';
+const txnId = "0123479543689";
 const amount = '15.0';
-const firstName = 'lokendra';
-const email = 'rawat';
+const firstName = 'Guru';
+const email = 'guru@gmail.com';
 const phone = '9999999999';
-const productInfo = 'productInfo';
-const merchantSUrl = 'https://google.co.in';
-const merchantFUrl = 'https://yahoo.co.in';
-let hash = sha512('gtKFFx|' + txnId + '|' + amount + '|' + productInfo + '|' + firstName + '|' + email + '|||||||||||eCwWELxi').toString('hex');
+const productInfo = 'Tshirt';
+const merchantSUrl = 'https://payu.herokuapp.com/success';
+const merchantFUrl = 'https://payu.herokuapp.com/failure';
+
+let hash = sha512(key + '|' + txnId + '|' + amount + '|' + productInfo + '|' + firstName + '|' + email + '|||||||||||' + salt).toString('hex');
+console.warn("Hash from react native is", hash);
 
 const App = () => {
-  console.warn(Object.keys(payu));
   return (
     <>
       <StatusBar backgroundColor="navy" barStyle="light-content" />
@@ -54,64 +101,31 @@ const App = () => {
         alignItems: 'center',
       }}>
         <Button
-          onPress={() => {
-            payu.makePayment(
-              key,
-              txnId,
-              amount,
-              firstName,
-              email,
-              phone,
-              productInfo,
-              merchantSUrl,
-              merchantFUrl,
-              hash,
-            );
-            console.warn('payment button');
+          onPress={async () => {
+            try {
+              let data = await PayuMoney.pay(
+                {
+                  key,
+                  txnId,
+                  amount,
+                  firstName,
+                  email,
+                  phone,
+                  productInfo,
+                  merchantSUrl,
+                  merchantFUrl,
+                  hash,
+                }
+              );
+              console.warn('final data is ', data);
+            } catch (e) {
+              console.warn('error is ', e);
+            }
           }}
           title="Click to pay" />
       </View>
     </>
   );
 };
-
-const styles = StyleSheet.create({
-  scrollView: {
-    backgroundColor: Colors.lighter,
-  },
-  engine: {
-    position: 'absolute',
-    right: 0,
-  },
-  body: {
-    backgroundColor: Colors.white,
-  },
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: Colors.black,
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-    color: Colors.dark,
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-  footer: {
-    color: Colors.dark,
-    fontSize: 12,
-    fontWeight: '600',
-    padding: 4,
-    paddingRight: 12,
-    textAlign: 'right',
-  },
-});
 
 export default App;

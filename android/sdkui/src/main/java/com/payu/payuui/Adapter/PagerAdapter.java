@@ -1,9 +1,14 @@
 package com.payu.payuui.Adapter;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
+
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentStatePagerAdapter;
+
+//import androidx.core.app.Fragment;
+//import androidx.core.app.FragmentManager;
+//import androidx.core.app.FragmentStatePagerAdapter;
 
 import com.payu.india.Model.PayuResponse;
 import com.payu.india.Payu.PayuConstants;
